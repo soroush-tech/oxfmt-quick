@@ -169,6 +169,12 @@ rather than looking `oxfmt` up on `PATH` — on Windows that entry is a `.CMD` s
 cannot be spawned without a shell, and a shell would reintroduce the quoting problems that
 passing an argv array exists to avoid.
 
+## Changelog
+
+Every released version has its own notes in
+[`release-notes/`](https://github.com/soroush-tech/oxfmt-quick/tree/main/release-notes) —
+one file per version, and the publish workflow refuses to ship a version without them.
+
 ## Licence
 
 [MIT](./LICENSE) — Powered by [Soroush.tech](https://soroush.tech)

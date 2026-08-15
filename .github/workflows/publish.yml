@@ -52,11 +52,22 @@ jobs:
         run: pnpm build
 
       # Refuse to publish a version that is already on npm rather than failing halfway
-      # through with a registry error.
-      - name: Check the version is new
+      # through with a registry error, and refuse to ship one with no notes — the version
+      # number is the release, so it does not get to arrive undocumented.
+      - name: Check the version is new and has notes
         run: |
           NAME=$(node -p "require('./package.json').name")
           VERSION=$(node -p "require('./package.json').version")
+          NOTES="release-notes/$VERSION.md"
+
+          if [ ! -f "$NOTES" ]; then
+            echo "Missing $NOTES — every released version needs its notes file."
+            exit 1
+          fi
+          if ! head -1 "$NOTES" | grep -qF "## $NAME@$VERSION"; then
+            echo "$NOTES must start with '## $NAME@$VERSION'."
+            exit 1
+          fi
           if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
             echo "$NAME@$VERSION is already published."
             exit 1
