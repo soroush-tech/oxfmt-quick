@@ -7,7 +7,11 @@ export type FailureReason =
   | 'STAGE_FAILED'
 
 export interface OxfmtQuickOptions {
-  /** Only consider files staged for commit. Default `true`. */
+  /**
+   * Pre-commit mode: consider only files staged for commit, and re-stage them after
+   * formatting. Default `false` — the same default `pretty-quick` has, where a bare run
+   * covers everything changed since the merge-base.
+   */
   staged: boolean
   /** Compare against this revision instead of the index. Implies `staged: false`. */
   since: string

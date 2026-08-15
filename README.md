@@ -16,9 +16,12 @@
 
 Runs [oxfmt](https://oxc.rs/docs/guide/usage/formatter) on your changed files.
 
-Formatting a whole repository on every commit is wasteful, and a `--check` gate that only
-tells you off is worse. `oxfmt-quick` formats what the commit actually contains, stages the
-result, and gets out of the way.
+Formatting a whole repository every time is wasteful, and a `--check` gate that only tells
+you off is worse. `oxfmt-quick` formats what you actually touched and gets out of the way.
+
+By default it takes everything changed since the merge-base with your branch, plus
+untracked files. Add `--staged` and it takes the index instead, re-staging what it
+formats — that is the pre-commit mode, and the same split `pretty-quick` uses.
 
 Supported source control managers:
 
@@ -59,7 +62,7 @@ pnpm add -D husky && pnpm exec husky init
 In `.husky/pre-commit`:
 
 ```sh
-pnpm exec oxfmt-quick
+pnpm exec oxfmt-quick --staged
 ```
 
 Or with [`simple-git-hooks`](https://github.com/toplenboren/simple-git-hooks), in
@@ -67,7 +70,7 @@ Or with [`simple-git-hooks`](https://github.com/toplenboren/simple-git-hooks), i
 
 ```jsonc
 "simple-git-hooks": {
-  "pre-commit": "npx oxfmt-quick"
+  "pre-commit": "npx oxfmt-quick --staged"
 }
 ```
 
@@ -77,26 +80,21 @@ A non-zero exit aborts the commit, so an unformatted tree cannot land.
 
 ### `--staged`
 
-Pre-commit mode, and the default. Only staged files are formatted, and they are re-staged
-afterwards. Anything unstaged is not going into the commit, so formatting it would be work
-the commit never uses.
+Pre-commit mode. Only staged files are formatted, and they are re-staged afterwards.
+Anything unstaged is not going into the commit, so formatting it would be work the commit
+never uses.
 
 Partially staged files are formatted but **not** re-staged, and `oxfmt-quick` exits with a
 non-zero code. See [Partially staged files](#partially-staged-files).
 
-### `--no-staged`
-
-Format everything changed since the merge-base with `--branch`, plus untracked files,
-instead of reading the index. Useful outside a commit hook.
-
 ### `--since <rev>`
 
-Compare against a specific revision — a commit hash, tag or ref. Implies `--no-staged`.
-For example `oxfmt-quick --since HEAD~5`.
+Compare against a specific revision — a commit hash, tag or ref — instead of the
+merge-base. For example `oxfmt-quick --since HEAD~5`.
 
 ### `--branch <name>`
 
-When not in `--staged` mode, the branch to find the merge-base against. Defaults to `main`.
+The branch to find the merge-base against, in the default mode. Defaults to `main`.
 
 The _merge-base_ is used rather than the branch tip, so a feature branch that has fallen
 behind does not drag in every file that changed on `main` in the meantime.

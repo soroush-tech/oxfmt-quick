@@ -55,7 +55,9 @@ describe('oxfmtQuick', () => {
   it('succeeds without calling oxfmt when nothing is staged', () => {
     const run = fakeRun({ staged: [] })
     const onFoundChangedFiles = vi.fn()
-    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, run, onFoundChangedFiles })).toEqual({
+    expect(
+      oxfmtQuick(HERE, { oxfmtCommand: OXFMT, staged: true, run, onFoundChangedFiles })
+    ).toEqual({
       success: true,
       errors: [],
     })
@@ -65,7 +67,7 @@ describe('oxfmtQuick', () => {
   it('succeeds without writing when every staged file is already formatted', () => {
     const run = fakeRun({ staged: ['a.ts'], listDifferent: [] })
     const onWriteFile = vi.fn()
-    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, run, onWriteFile })).toEqual({
+    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, staged: true, run, onWriteFile })).toEqual({
       success: true,
       errors: [],
     })
@@ -75,7 +77,9 @@ describe('oxfmtQuick', () => {
   it('reads the file list from --list-different even though it exits non-zero', () => {
     const run = fakeRun({ staged: ['a.ts'], unstaged: [], listDifferent: ['a.ts'] })
     const onWriteFile = vi.fn()
-    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, run, onWriteFile }).success).toBe(true)
+    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, staged: true, run, onWriteFile }).success).toBe(
+      true
+    )
     expect(onWriteFile).toHaveBeenCalledWith('a.ts')
   })
 
@@ -89,7 +93,7 @@ describe('oxfmtQuick', () => {
     })
     const onStageFiles = vi.fn()
 
-    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, run, onStageFiles })).toEqual({
+    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, staged: true, run, onStageFiles })).toEqual({
       success: true,
       errors: [],
     })
@@ -107,7 +111,9 @@ describe('oxfmtQuick', () => {
     })
     const onPartiallyStagedFile = vi.fn()
 
-    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, run, onPartiallyStagedFile })).toEqual({
+    expect(
+      oxfmtQuick(HERE, { oxfmtCommand: OXFMT, staged: true, run, onPartiallyStagedFile })
+    ).toEqual({
       success: false,
       errors: ['PARTIALLY_STAGED_FILE'],
     })
@@ -121,7 +127,14 @@ describe('oxfmtQuick', () => {
     const onWriteFile = vi.fn()
 
     expect(
-      oxfmtQuick(HERE, { oxfmtCommand: OXFMT, run, check: true, onCheckFile, onWriteFile })
+      oxfmtQuick(HERE, {
+        oxfmtCommand: OXFMT,
+        staged: true,
+        run,
+        check: true,
+        onCheckFile,
+        onWriteFile,
+      })
     ).toEqual({ success: false, errors: ['CHECK_FAILED'] })
     expect(onCheckFile).toHaveBeenCalledWith('a.ts', false)
     expect(onWriteFile).not.toHaveBeenCalled()
@@ -130,7 +143,9 @@ describe('oxfmtQuick', () => {
   it('passes check when nothing is unformatted', () => {
     const run = fakeRun({ staged: ['a.ts'], listDifferent: [] })
     const onCheckFile = vi.fn()
-    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, run, check: true, onCheckFile })).toEqual({
+    expect(
+      oxfmtQuick(HERE, { oxfmtCommand: OXFMT, staged: true, run, check: true, onCheckFile })
+    ).toEqual({
       success: true,
       errors: [],
     })
@@ -139,7 +154,7 @@ describe('oxfmtQuick', () => {
 
   it('reports BAIL_ON_WRITE but still formats', () => {
     const run = fakeRun({ staged: ['a.ts'], unstaged: [], listDifferent: ['a.ts'] })
-    const result = oxfmtQuick(HERE, { oxfmtCommand: OXFMT, run, bail: true })
+    const result = oxfmtQuick(HERE, { oxfmtCommand: OXFMT, staged: true, run, bail: true })
     expect(result.success).toBe(false)
     expect(result.errors).toContain('BAIL_ON_WRITE')
   })
@@ -153,7 +168,7 @@ describe('oxfmtQuick', () => {
       formatFails: true,
       onStage: (files) => staged.push(files),
     })
-    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, run })).toEqual({
+    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, staged: true, run })).toEqual({
       success: false,
       errors: ['FORMAT_FAILED'],
     })
@@ -168,7 +183,7 @@ describe('oxfmtQuick', () => {
       listDifferent: ['a.ts'],
       onStage: (files) => staged.push(files),
     })
-    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, run, restage: false })).toEqual({
+    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, staged: true, run, restage: false })).toEqual({
       success: true,
       errors: [],
     })
@@ -182,7 +197,7 @@ describe('oxfmtQuick', () => {
       listDifferent: ['a.ts'],
       stageFails: true,
     })
-    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, run })).toEqual({
+    expect(oxfmtQuick(HERE, { oxfmtCommand: OXFMT, staged: true, run })).toEqual({
       success: false,
       errors: ['STAGE_FAILED'],
     })
@@ -240,6 +255,7 @@ describe('oxfmtQuick', () => {
     const onExamineFile = vi.fn()
     oxfmtQuick(HERE, {
       oxfmtCommand: OXFMT,
+      staged: true,
       run: fakeRun({ staged: ['a.ts'], listDifferent: [] }),
       onExamineFile,
     })
@@ -247,6 +263,7 @@ describe('oxfmtQuick', () => {
 
     oxfmtQuick(HERE, {
       oxfmtCommand: OXFMT,
+      staged: true,
       run: fakeRun({ staged: ['a.ts'], listDifferent: [] }),
       verbose: true,
       onExamineFile,
@@ -256,7 +273,7 @@ describe('oxfmtQuick', () => {
 
   it('passes --config through to oxfmt', () => {
     const run = fakeRun({ staged: ['a.ts'], listDifferent: [] })
-    oxfmtQuick(HERE, { oxfmtCommand: OXFMT, run, config: 'custom.json' })
+    oxfmtQuick(HERE, { oxfmtCommand: OXFMT, staged: true, run, config: 'custom.json' })
     expect(run).toHaveBeenCalledWith(
       'oxfmt',
       expect.arrayContaining(['--config', 'custom.json']),
@@ -265,7 +282,7 @@ describe('oxfmtQuick', () => {
   })
 
   it('throws outside a git repository', () => {
-    expect(() => oxfmtQuick('/', { oxfmtCommand: OXFMT, run: fakeRun({}) })).toThrow(
+    expect(() => oxfmtQuick('/', { oxfmtCommand: OXFMT, staged: true, run: fakeRun({}) })).toThrow(
       /not inside a git repository/
     )
   })
@@ -277,8 +294,24 @@ describe('oxfmtQuick', () => {
       return ok(args.includes('--cached') ? 'a.ts\0' : '')
     }) as unknown as Run
 
-    expect(oxfmtQuick(HERE, { run })).toEqual({ success: true, errors: [] })
+    expect(oxfmtQuick(HERE, { staged: true, run })).toEqual({ success: true, errors: [] })
     expect(seen).toContain('git')
     expect(seen).toContain(process.execPath)
+  })
+
+  // The default is the behaviour a bare `oxfmt-quick` gets, so it is pinned explicitly:
+  // flipping it back would otherwise only show up as a surprise in someone's hook.
+  it('defaults to changed-since-merge-base, not the index', () => {
+    const asked: string[][] = []
+    const run = vi.fn(((_command: string, args: string[]) => {
+      asked.push(args)
+      if (args[0] === 'merge-base') return ok('abc1234\n')
+      return ok()
+    }) as Run) as unknown as Run
+
+    oxfmtQuick(HERE, { oxfmtCommand: OXFMT, run })
+
+    expect(asked.some(([subcommand]) => subcommand === 'merge-base')).toBe(true)
+    expect(asked.some((args) => args.includes('--cached'))).toBe(false)
   })
 })

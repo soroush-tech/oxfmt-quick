@@ -5,7 +5,7 @@ import { oxfmtQuick } from './index.js'
 
 const args = mri(process.argv.slice(2), {
   boolean: ['staged', 'check', 'bail', 'restage', 'verbose', 'help'],
-  default: { staged: true, restage: true },
+  default: { restage: true },
   alias: { h: 'help' },
 })
 
@@ -15,10 +15,12 @@ const HELP = `
   ${pc.bold('Usage')}
     oxfmt-quick [options]
 
+  By default, formats everything changed since the merge-base with --branch, plus
+  untracked files. Use --staged in a pre-commit hook.
+
   ${pc.bold('Options')}
-    --staged           Only files staged for commit ${pc.dim('(default)')}
-    --no-staged        Files changed since the merge-base instead
-    --since <rev>      Compare against <rev>; implies --no-staged
+    --staged           Only files staged for commit, re-staged after ${pc.dim('(pre-commit)')}
+    --since <rev>      Compare against <rev> instead of the merge-base
     --branch <name>    Branch to find the merge-base against ${pc.dim('(default: main)')}
     --check            Report unformatted files without writing, and exit non-zero
     --bail             Fail as soon as any file needs formatting

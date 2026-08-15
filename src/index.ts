@@ -7,22 +7,26 @@ import type { FailureReason, OxfmtQuickOptions, OxfmtQuickResult, Run } from './
 export type { FailureReason, OxfmtQuickOptions, OxfmtQuickResult, Run } from './types'
 
 /**
- * Format the files a commit is about to contain, then re-stage them.
+ * Format your changed files.
  *
- * In staged mode only the index is consulted: anything unstaged is not going into the
- * commit, so formatting it would be work the commit never uses.
+ * By default that means everything changed since the merge-base with `branch`, plus
+ * untracked files — the same default `pretty-quick` has, so the two behave alike.
  *
- * A file that is staged *and* edited further is formatted but deliberately **not**
- * re-staged — `git add`ing it would sweep those unstaged edits into the commit and
- * silently widen it. The run reports `PARTIALLY_STAGED_FILE` so the hook fails and you
- * decide what to stage.
+ * With `staged`, only the index is consulted and the formatted files are re-staged: that
+ * is the pre-commit mode, where anything unstaged is not going into the commit and
+ * formatting it would be work the commit never uses.
+ *
+ * In that mode a file that is staged *and* edited further is formatted but deliberately
+ * **not** re-staged — `git add`ing it would sweep those unstaged edits into the commit
+ * and silently widen it. The run reports `PARTIALLY_STAGED_FILE` so the hook fails and
+ * you decide what to stage.
  */
 export const oxfmtQuick = (
   directory: string,
   options: Partial<OxfmtQuickOptions> & { run?: Run; oxfmtCommand?: string[] } = {}
 ): OxfmtQuickResult => {
   const {
-    staged = true,
+    staged = false,
     since,
     branch = 'main',
     check = false,
