@@ -1,6 +1,6 @@
 {
   "name": "oxfmt-quick",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Run oxfmt on your changed files, and re-stage them. A pretty-quick for the oxc formatter.",
   "keywords": [
     "formatter",
