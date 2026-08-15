@@ -14,11 +14,13 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment: npm
+    # Gate the run so publishing can carry protection rules of its own. npm's trusted
+    # publisher must name this same environment, or the OIDC claim will not match.
+    environment: publish
     permissions:
       contents: read
-      # Required for npm provenance: npm exchanges this for a signed attestation tying
-      # the published tarball to this workflow run and commit.
+      # npm Trusted Publishing: GitHub mints a short-lived id-token per run and npm
+      # verifies it against the package's trusted publisher. There is no NPM_TOKEN.
       id-token: write
     steps:
       - name: Checkout
@@ -34,7 +36,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          registry-url: https://registry.npmjs.org
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install
         run: pnpm install --frozen-lockfile
@@ -74,7 +76,15 @@ jobs:
           fi
           echo "Publishing $NAME@$VERSION."
 
+      # Auth is the id-token minted above. NODE_AUTH_TOKEN must stay unset — even an
+      # empty value makes pnpm use token auth instead of falling back to OIDC. Provenance
+      # is produced by Trusted Publishing itself, so --provenance is not passed.
+      # --no-git-checks because the release checkout is a detached HEAD.
       - name: Publish
-        run: pnpm publish --access public --no-git-checks --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish --no-git-checks
+
+      - name: Summarise
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "### 📦 Published \`oxfmt-quick@$VERSION\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "https://www.npmjs.com/package/oxfmt-quick/v/$VERSION" >> "$GITHUB_STEP_SUMMARY"
