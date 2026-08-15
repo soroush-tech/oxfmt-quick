@@ -64,12 +64,39 @@ jobs:
       # in the npm CLI, and only npm 11+ can perform the OIDC exchange. Node 22 still
       # bundles npm 10, which publishes anonymously — reported by the registry as a 404 on
       # the package rather than as an auth error. .nvmrc pins a line new enough to avoid it.
+      #
+      # No registry-url, deliberately. It makes setup-node write an .npmrc carrying
+      # `always-auth` and `_authToken=${NODE_AUTH_TOKEN}`; with no such token to expand,
+      # npm reads that literal placeholder as a credential, considers auth settled, and
+      # never attempts the OIDC exchange — publishing anonymously and 404ing on a package
+      # it does not own. The default registry is npmjs.org anyway, so nothing is lost.
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          registry-url: 'https://registry.npmjs.org'
+
+      # Both ways this can silently fall back to an anonymous publish are checked here,
+      # because the registry reports that as a 404 on the package — a misleading error, and
+      # one that only arrives after the whole run has been spent. Fail in seconds instead.
+      - name: Preflight the OIDC publish
+        run: |
+          VERSION=$(npm --version)
+          if [ "$(printf '%s\n11.5.1\n' "$VERSION" | sort -V | head -1)" != "11.5.1" ]; then
+            echo "::error::npm $VERSION cannot do trusted publishing; 11.5.1 or newer is required."
+            exit 1
+          fi
+
+          # Read the npmrc rather than asking npm: it refuses to print auth values at all
+          # ("the option is protected"), and does so with a non-zero exit.
+          NPMRC="${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
+          if [ -f "$NPMRC" ] && grep -q '_authToken' "$NPMRC"; then
+            echo "::error::$NPMRC configures an auth token, so the OIDC exchange would be skipped."
+            echo "::error::Usually setup-node's registry-url input — remove it."
+            exit 1
+          fi
+
+          echo "npm $VERSION, no auth token in ${NPMRC} — OIDC it is."
 
       # --ignore-scripts, as everywhere in CI/CD: no lifecycle script runs at install.
       - name: Install dependencies
