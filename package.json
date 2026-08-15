@@ -1,0 +1,90 @@
+{
+  "name": "oxfmt-quick",
+  "version": "1.0.0",
+  "description": "Run oxfmt on your changed files, and re-stage them. A pretty-quick for the oxc formatter.",
+  "keywords": [
+    "formatter",
+    "git",
+    "hook",
+    "husky",
+    "oxc",
+    "oxfmt",
+    "pre-commit",
+    "precommit",
+    "pretty-quick",
+    "staged"
+  ],
+  "bugs": {
+    "url": "https://github.com/soroush-tech/oxfmt-quick/issues"
+  },
+  "license": "MIT",
+  "author": "Masoud Soroush <masoud@soroush.tech>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soroush-tech/oxfmt-quick.git"
+  },
+  "bin": {
+    "oxfmt-quick": "./dist/cli.mjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "bin": {
+      "oxfmt-quick": "./dist/cli.mjs"
+    },
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.mts",
+    "exports": {
+      ".": {
+        "import": {
+          "types": "./dist/index.d.mts",
+          "default": "./dist/index.mjs"
+        },
+        "require": {
+          "types": "./dist/index.d.cts",
+          "default": "./dist/index.cjs"
+        }
+      },
+      "./package.json": "./package.json"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "lint": "oxlint --deny-warnings",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "mri": "^1.2.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "oxfmt": "^0.63.0",
+    "oxlint": "^1.78.0",
+    "tsdown": "^0.22.14",
+    "typescript": "~7.0.2",
+    "vitest": "^4.1.10"
+  },
+  "peerDependencies": {
+    "oxfmt": ">=0.60.0"
+  },
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || >=24"
+  },
+  "packageManager": "pnpm@10.13.1"
+}

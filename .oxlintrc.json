@@ -1,0 +1,5 @@
+{
+  "plugins": ["eslint", "typescript", "unicorn", "oxc"],
+  "categories": { "correctness": "error" },
+  "ignorePatterns": ["dist", "coverage"]
+}
