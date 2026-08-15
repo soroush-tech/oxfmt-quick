@@ -1,62 +1,82 @@
 name: Publish
 
-# Triggered by publishing a GitHub release, so the tag, the release notes and the npm
-# version are decided in one place. workflow_dispatch is the manual escape hatch.
+# Publishes to npm via Trusted Publishing (OIDC), then cuts the GitHub Release. Manual
+# dispatch only — never from a push, a merge, or CI finishing. A release is a deliberate
+# act with required, human-written notes; auth is a short-lived id-token minted per run
+# and verified against the npm trusted publisher, so there is no long-lived token.
+#
+# Deliberately not triggered by `release: published` — this workflow *creates* the
+# release, so that trigger would be circular.
+
 on:
-  release:
-    types: [published]
   workflow_dispatch:
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
   publish:
+    # main-only: a release always comes off the CI-passed main branch, even though the
+    # dispatch UI lets you pick any ref.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    # Gate the run so publishing can carry protection rules of its own. npm's trusted
-    # publisher must name this same environment, or the OIDC claim will not match.
     environment: publish
+    timeout-minutes: 15
     permissions:
-      contents: read
-      # npm Trusted Publishing: GitHub mints a short-lived id-token per run and npm
-      # verifies it against the package's trusted publisher. There is no NPM_TOKEN.
-      id-token: write
+      id-token: write # OIDC token for npm Trusted Publishing (no NPM_TOKEN)
+      contents: write # create the GitHub Release + tag
     steps:
       - name: Checkout
         uses: actions/checkout@v5
         with:
           persist-credentials: false
 
+      # The version is the release, so refuse one that is undocumented before doing any
+      # work — and read it once here for every later step.
+      - name: Resolve the version and check its notes
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          NOTES="release-notes/$VERSION.md"
+
+          test -f "$NOTES" \
+            || { echo "::error::Missing release notes: $NOTES"; exit 1; }
+          head -1 "$NOTES" | grep -qF "## $NAME@$VERSION" \
+            || { echo "::error::$NOTES must start with '## $NAME@$VERSION'"; exit 1; }
+
+          {
+            echo "PKG_NAME=$NAME"
+            echo "PKG_VERSION=$VERSION"
+            echo "NOTES_FILE=$NOTES"
+          } >> "$GITHUB_ENV"
+
+      - name: Read Node.js version from .nvmrc
+        run: echo "NODE_VERSION=$(cat .nvmrc)" >> "$GITHUB_ENV"
+
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
-      # No registry-url: it writes an .npmrc line of `_authToken=${NODE_AUTH_TOKEN}`, and
-      # with no such token to expand, that placeholder is read as the credential — enough
-      # for the client to think auth is settled and skip the OIDC exchange entirely.
+      # The Node line matters for more than the build: trusted publishing is implemented
+      # in the npm CLI, and only npm 11+ can perform the OIDC exchange. Node 22 still
+      # bundles npm 10, which publishes anonymously — reported by the registry as a 404 on
+      # the package rather than as an auth error. .nvmrc pins a line new enough to avoid it.
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
 
-      # Trusted publishing is implemented in the npm CLI and needs 11.5.1 or newer. Node 22
-      # still bundles npm 10, which has no OIDC support at all and would publish
-      # anonymously — which the registry reports as a 404 on the package, not as an auth
-      # error. Fail loudly here instead.
-      - name: Setup npm
-        run: |
-          npm install --global npm@latest
-          npx semver "$(npm --version)" --range '>=11.5.1' >/dev/null || {
-            echo "npm $(npm --version) cannot do trusted publishing; 11.5.1+ is required."
-            exit 1
-          }
+      # --ignore-scripts, as everywhere in CI/CD: no lifecycle script runs at install.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      # Publishing an unformatted, failing or unbuildable package is worse than not
-      # publishing, and a release can be cut from a commit CI never saw.
+      # Publishing something unformatted, failing or unbuildable is worse than not
+      # publishing, and a dispatch can be run against a commit CI never saw.
       - name: Verify
         run: |
           pnpm format:check
@@ -67,38 +87,39 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # Refuse to publish a version that is already on npm rather than failing halfway
-      # through with a registry error, and refuse to ship one with no notes — the version
-      # number is the release, so it does not get to arrive undocumented.
-      - name: Check the version is new and has notes
-        run: |
-          NAME=$(node -p "require('./package.json').name")
-          VERSION=$(node -p "require('./package.json').version")
-          NOTES="release-notes/$VERSION.md"
-
-          if [ ! -f "$NOTES" ]; then
-            echo "Missing $NOTES — every released version needs its notes file."
-            exit 1
-          fi
-          if ! head -1 "$NOTES" | grep -qF "## $NAME@$VERSION"; then
-            echo "$NOTES must start with '## $NAME@$VERSION'."
-            exit 1
-          fi
-          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
-            echo "$NAME@$VERSION is already published."
-            exit 1
-          fi
-          echo "Publishing $NAME@$VERSION."
-
-      # Auth is the id-token minted above. NODE_AUTH_TOKEN must stay unset — even an
-      # empty value makes pnpm use token auth instead of falling back to OIDC. Provenance
-      # is produced by Trusted Publishing itself, so --provenance is not passed.
-      # --no-git-checks because the release checkout is a detached HEAD.
+      # Publish via Trusted Publishing (OIDC). Auth comes from the id-token minted above —
+      # there is no NPM_TOKEN, and NODE_AUTH_TOKEN must stay unset, because even an empty
+      # value makes pnpm use token auth instead of falling back to OIDC. A version already
+      # on the registry is skipped rather than failed, so a rerun can carry on to the
+      # release step below instead of dying on a republish.
       - name: Publish
-        run: pnpm publish --no-git-checks
-
-      - name: Summarise
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "### 📦 Published \`oxfmt-quick@$VERSION\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "https://www.npmjs.com/package/oxfmt-quick/v/$VERSION" >> "$GITHUB_STEP_SUMMARY"
+          if npm view "$PKG_NAME@$PKG_VERSION" version >/dev/null 2>&1; then
+            echo "⏭️ \`$PKG_NAME@$PKG_VERSION\` already on npm — skipped (bump the version to release)." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          pnpm publish --no-git-checks
+          echo "### 📦 Published \`$PKG_NAME@$PKG_VERSION\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "https://www.npmjs.com/package/$PKG_NAME/v/$PKG_VERSION" >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=Published::$PKG_NAME@$PKG_VERSION"
+
+      # Gated on the release's existence rather than on whether this run published, so a
+      # rerun can repair a missing release after a successful publish. Runs even if the
+      # step above failed (`!cancelled()`); a version that never reached npm is skipped
+      # rather than released. Notes come from the in-repo file verbatim via --notes-file.
+      - name: Create the GitHub Release
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v$PKG_VERSION"
+          if ! npm view "$PKG_NAME@$PKG_VERSION" version >/dev/null 2>&1; then
+            echo "⏭️ \`$TAG\` is not on npm — no GitHub Release created." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "⏭️ GitHub Release \`$TAG\` already exists — skipped." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          gh release create "$TAG" --title "$PKG_NAME@$PKG_VERSION" --notes-file "$NOTES_FILE"
+          echo "### 🏷️ Released \`$TAG\`" >> "$GITHUB_STEP_SUMMARY"
