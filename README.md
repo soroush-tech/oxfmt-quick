@@ -1,9 +1,13 @@
 # `oxfmt-quick`
 
-[![npm](https://img.shields.io/npm/v/oxfmt-quick.svg)](https://www.npmjs.com/package/oxfmt-quick)
-[![npm downloads](https://img.shields.io/npm/dm/oxfmt-quick.svg)](https://www.npmjs.com/package/oxfmt-quick)
-[![license](https://img.shields.io/npm/l/oxfmt-quick.svg)](./LICENSE)
+[![npm version](https://img.shields.io/npm/v/oxfmt-quick.svg?cacheSeconds=86400)](https://www.npmjs.com/package/oxfmt-quick)
+[![npm downloads](https://img.shields.io/npm/dm/oxfmt-quick.svg?cacheSeconds=86400)](https://www.npmjs.com/package/oxfmt-quick)
+[![coverage](https://codecov.io/gh/soroush-tech/oxfmt-quick/branch/main/graph/badge.svg)](https://app.codecov.io/gh/soroush-tech/oxfmt-quick)
+[![unpacked size](https://img.shields.io/npm/unpacked-size/oxfmt-quick.svg?cacheSeconds=86400)](https://www.npmjs.com/package/oxfmt-quick)
+[![types included](https://img.shields.io/npm/types/oxfmt-quick.svg?cacheSeconds=86400)](https://www.npmjs.com/package/oxfmt-quick)
+[![license](https://img.shields.io/npm/l/oxfmt-quick.svg?cacheSeconds=86400)](./LICENSE)
 
+[![CI](https://github.com/soroush-tech/oxfmt-quick/actions/workflows/ci.yml/badge.svg)](https://github.com/soroush-tech/oxfmt-quick/actions/workflows/ci.yml)
 [![Conventional Commits](https://img.shields.io/badge/conventional%20commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![Code Style: oxfmt](https://img.shields.io/badge/code_style-oxfmt-blue.svg)](https://oxc.rs/docs/guide/usage/formatter)
 [![Linted with oxlint](https://img.shields.io/badge/linted_with-oxlint-blue.svg)](https://oxc.rs/docs/guide/usage/linter)

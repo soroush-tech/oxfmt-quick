@@ -68,6 +68,11 @@ jobs:
             node: 24
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
+    permissions:
+      contents: read
+      # Codecov authenticates with a short-lived OIDC token minted per run, so there is
+      # no upload token to store, leak or rotate.
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -89,14 +94,15 @@ jobs:
       - name: Test with coverage
         run: pnpm test:coverage
 
-      # One job uploads coverage; three identical uploads would tell us nothing extra.
+      # One job uploads coverage; five identical uploads would tell us nothing extra.
       - name: Upload coverage
         if: matrix.os == 'ubuntu-latest' && matrix.node == 22
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
           files: ./coverage/lcov.info
           slug: soroush-tech/oxfmt-quick
+          fail_ci_if_error: true
 
   # One required check to protect the branch with, instead of nine that change name
   # whenever the matrix does.
