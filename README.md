@@ -171,6 +171,26 @@ rather than looking `oxfmt` up on `PATH` — on Windows that entry is a `.CMD` s
 cannot be spawned without a shell, and a shell would reintroduce the quoting problems that
 passing an argv array exists to avoid.
 
+## What it accesses
+
+Supply-chain scanners flag the Node built-ins a package imports. There are three, each
+used in one file for one purpose:
+
+| Built-in             | Where                 | What for                                      |
+| -------------------- | --------------------- | --------------------------------------------- |
+| `node:child_process` | `src/run.ts`          | running `git` and `oxfmt`                     |
+| `node:fs`            | `src/scm/git.ts`      | one `existsSync` to locate `.git`             |
+| `node:module`        | `src/resolveOxfmt.ts` | `createRequire`, to find oxfmt's `bin` script |
+
+Worth being precise about, since scanners often label the first one "shell access":
+**no shell is ever used.** `spawnSync` is called with an argument array and without
+`shell: true`, so paths containing spaces, quotes or glob characters cannot be
+reinterpreted. There is no `eval`, no dynamic `require` of user input, no network access,
+and nothing is read from the environment.
+
+The package writes no files itself — oxfmt does that — and its only writes to your
+repository are the `git add` calls that re-stage what oxfmt formatted.
+
 ## Changelog
 
 Every released version has its own notes in
