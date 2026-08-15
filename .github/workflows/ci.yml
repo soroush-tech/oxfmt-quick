@@ -46,6 +46,12 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      # Built once, here, rather than in every matrix cell: the output is identical
+      # everywhere, and tsdown requires Node ^22.18 || >=24.11 — it cannot run on the
+      # Node 20 the test matrix deliberately still covers.
+      - name: Build
+        run: pnpm build
+
   # Tests run on every OS on purpose: this package spawns processes and reads git output,
   # and both of the bugs found while writing it were Windows-only — a `.CMD` shim that
   # cannot be spawned directly, and path handling.
@@ -82,9 +88,6 @@ jobs:
 
       - name: Test with coverage
         run: pnpm test:coverage
-
-      - name: Build
-        run: pnpm build
 
       # One job uploads coverage; three identical uploads would tell us nothing extra.
       - name: Upload coverage

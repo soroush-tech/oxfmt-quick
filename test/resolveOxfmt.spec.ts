@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, describe, expect, it } from 'vitest'
@@ -19,7 +19,9 @@ describe('resolveOxfmt', () => {
 })
 
 describe('resolveOxfmt with a string bin field', () => {
-  const temp = mkdtempSync(join(tmpdir(), 'oxfmt-quick-resolve-'))
+  // realpath, because on macOS os.tmpdir() is `/var/...` while Node's resolver returns the
+  // canonical `/private/var/...` — comparing the two forms fails there and nowhere else.
+  const temp = realpathSync(mkdtempSync(join(tmpdir(), 'oxfmt-quick-resolve-')))
   afterAll(() => rmSync(temp, { recursive: true, force: true }))
 
   it('accepts `bin` declared as a plain string rather than a map', () => {
