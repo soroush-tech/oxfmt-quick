@@ -14,11 +14,12 @@
     "pretty-quick",
     "staged"
   ],
+  "homepage": "https://soroush.tech/oxfmt-quick/",
   "bugs": {
     "url": "https://github.com/soroush-tech/oxfmt-quick/issues"
   },
   "license": "MIT",
-  "author": "Masoud Soroush <masoud@soroush.tech>",
+  "author": "Masoud Soroush <masoud@soroush.tech> (https://soroush.tech)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/soroush-tech/oxfmt-quick.git"

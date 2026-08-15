@@ -3,3 +3,4 @@ dist/
 coverage/
 *.tsbuildinfo
 .tmp-e2e/
+.idea
