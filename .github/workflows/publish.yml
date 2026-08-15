@@ -31,12 +31,26 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
 
+      # No registry-url: it writes an .npmrc line of `_authToken=${NODE_AUTH_TOKEN}`, and
+      # with no such token to expand, that placeholder is read as the credential — enough
+      # for the client to think auth is settled and skip the OIDC exchange entirely.
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: pnpm
-          registry-url: 'https://registry.npmjs.org'
+
+      # Trusted publishing is implemented in the npm CLI and needs 11.5.1 or newer. Node 22
+      # still bundles npm 10, which has no OIDC support at all and would publish
+      # anonymously — which the registry reports as a 404 on the package, not as an auth
+      # error. Fail loudly here instead.
+      - name: Setup npm
+        run: |
+          npm install --global npm@latest
+          npx semver "$(npm --version)" --range '>=11.5.1' >/dev/null || {
+            echo "npm $(npm --version) cannot do trusted publishing; 11.5.1+ is required."
+            exit 1
+          }
 
       - name: Install
         run: pnpm install --frozen-lockfile
