@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & Discussions
+    url: https://github.com/soroush-tech/oxfmt-quick/discussions
+    about: Please use Discussions for questions, ideas, or general feedback.
+  - name: oxfmt itself
+    url: https://github.com/oxc-project/oxc/issues
+    about: Formatting output, config resolution and ignore rules are oxfmt's, not this wrapper's.

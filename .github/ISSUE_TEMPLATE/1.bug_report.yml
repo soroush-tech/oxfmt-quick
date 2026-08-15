@@ -1,0 +1,91 @@
+name: Bug report 🐛
+description: Something oxfmt-quick did that it should not have.
+labels: ['status: needs triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please give the issue a searchable title above ⬆️
+
+        Thanks for taking the time to report this! ❤️
+
+  - type: checkboxes
+    attributes:
+      label: Duplicates
+      description: Please [search the existing issues](https://github.com/soroush-tech/oxfmt-quick/issues) first.
+      options:
+        - label: I have searched the existing issues
+          required: true
+
+  - type: checkboxes
+    attributes:
+      label: Latest version
+      description: Please confirm the problem is still there on the newest release.
+      options:
+        - label: I have reproduced this on the latest version of `oxfmt-quick`
+          required: true
+
+  - type: textarea
+    attributes:
+      label: What happened
+      description: What did oxfmt-quick do, and what did you expect instead?
+      placeholder: |
+        I ran `oxfmt-quick` in a pre-commit hook and it …
+        I expected it to …
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Reproduction
+      description: |
+        The git state matters more than anything else here. Which files were staged,
+        which had unstaged edits on top, and what command did you run?
+      placeholder: |
+        1. git add src/a.ts
+        2. edit src/a.ts again without staging
+        3. pnpm exec oxfmt-quick
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Output
+      description: The full terminal output, including the exit code. Paste it as text, not a screenshot.
+      render: shell
+    validations:
+      required: false
+
+  - type: input
+    attributes:
+      label: oxfmt-quick version
+      placeholder: '1.0.0'
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: oxfmt version
+      placeholder: '0.63.0'
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Operating system
+      description: Path handling and process spawning differ most on Windows, so this is worth knowing.
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Node version
+      description: The output of `node --version`.
+      placeholder: 'v22.11.0'
+    validations:
+      required: true

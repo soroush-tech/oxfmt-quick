@@ -1,0 +1,69 @@
+name: Publish
+
+# Triggered by publishing a GitHub release, so the tag, the release notes and the npm
+# version are decided in one place. workflow_dispatch is the manual escape hatch.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: npm
+    permissions:
+      contents: read
+      # Required for npm provenance: npm exchanges this for a signed attestation tying
+      # the published tarball to this workflow run and commit.
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # Publishing an unformatted, failing or unbuildable package is worse than not
+      # publishing, and a release can be cut from a commit CI never saw.
+      - name: Verify
+        run: |
+          pnpm format:check
+          pnpm lint
+          pnpm typecheck
+          pnpm test:coverage
+
+      - name: Build
+        run: pnpm build
+
+      # Refuse to publish a version that is already on npm rather than failing halfway
+      # through with a registry error.
+      - name: Check the version is new
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "$NAME@$VERSION is already published."
+            exit 1
+          fi
+          echo "Publishing $NAME@$VERSION."
+
+      - name: Publish
+        run: pnpm publish --access public --no-git-checks --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
