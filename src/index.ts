@@ -45,7 +45,7 @@ export const oxfmtQuick = (
     onStageFiles,
   } = options
 
-  const root = git.findRepoRoot(directory)
+  const root = git.findRepoRoot(run, directory)
   if (!root) throw new Error('oxfmt-quick: not inside a git repository.')
 
   const command = oxfmtCommand ?? resolveOxfmt(root)

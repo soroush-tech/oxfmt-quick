@@ -33,6 +33,8 @@ const fakeRun = (responses: {
     }
 
     const [subcommand] = args
+    // Every run starts by asking git where the repository root is.
+    if (subcommand === 'rev-parse') return ok('/repo\n')
     if (subcommand === 'merge-base') {
       return responses.mergeBase === false ? fail() : ok(`${responses.mergeBase ?? 'abc1234'}\n`)
     }
@@ -281,8 +283,9 @@ describe('oxfmtQuick', () => {
     )
   })
 
-  it('throws outside a git repository', () => {
-    expect(() => oxfmtQuick('/', { oxfmtCommand: OXFMT, staged: true, run: fakeRun({}) })).toThrow(
+  it('throws outside a git repository, where rev-parse exits non-zero', () => {
+    const run = (() => fail()) as unknown as Run
+    expect(() => oxfmtQuick('/', { oxfmtCommand: OXFMT, staged: true, run })).toThrow(
       /not inside a git repository/
     )
   })
@@ -291,6 +294,7 @@ describe('oxfmtQuick', () => {
     const seen: string[] = []
     const run = ((command: string, args: string[]) => {
       seen.push(command)
+      if (args[0] === 'rev-parse') return ok(`${HERE}\n`)
       return ok(args.includes('--cached') ? 'a.ts\0' : '')
     }) as unknown as Run
 
@@ -305,6 +309,7 @@ describe('oxfmtQuick', () => {
     const asked: string[][] = []
     const run = vi.fn(((_command: string, args: string[]) => {
       asked.push(args)
+      if (args[0] === 'rev-parse') return ok('/repo\n')
       if (args[0] === 'merge-base') return ok('abc1234\n')
       return ok()
     }) as Run) as unknown as Run

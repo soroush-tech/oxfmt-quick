@@ -1,19 +1,19 @@
-import { existsSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
 import type { Run } from '../types'
 
 /**
- * Walk up looking for `.git`. It is a *file* rather than a directory inside a worktree
- * or submodule, so both count.
+ * The repository root, or `null` outside one.
+ *
+ * Asked of git rather than found by walking up looking for `.git`. Git already knows the
+ * answer and knows it better: it honours `GIT_DIR` and `GIT_WORK_TREE`, resolves worktrees
+ * and submodules — where `.git` is a file, not a directory — and returns a canonical path.
+ * A hand-rolled walk only approximates all of that.
+ *
+ * It also means this module touches no filesystem API at all; every question about the
+ * repository goes through git.
  */
-export const findRepoRoot = (from: string): string | null => {
-  let directory = resolve(from)
-  for (;;) {
-    if (existsSync(resolve(directory, '.git'))) return directory
-    const parent = dirname(directory)
-    if (parent === directory) return null
-    directory = parent
-  }
+export const findRepoRoot = (run: Run, from: string): string | null => {
+  const { stdout, status } = run('git', ['rev-parse', '--show-toplevel'], from)
+  return status === 0 ? stdout.trim() || null : null
 }
 
 /**

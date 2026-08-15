@@ -1,34 +1,23 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { join, parse, resolve } from 'node:path'
-import { afterAll, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { findRepoRoot, getSinceRevision, getStagedFiles, stageFiles } from '../src/scm/git'
 import type { CommandResult, Run } from '../src/types'
-
-const temp = mkdtempSync(join(tmpdir(), 'oxfmt-quick-'))
-afterAll(() => rmSync(temp, { recursive: true, force: true }))
 
 const responding = (result: Partial<CommandResult>) =>
   vi.fn(() => ({ stdout: '', stderr: '', status: 0, ...result })) as unknown as Run
 
 describe('findRepoRoot', () => {
-  it('finds a .git directory from a nested path', () => {
-    const root = join(temp, 'repo')
-    const nested = join(root, 'a', 'b')
-    mkdirSync(join(root, '.git'), { recursive: true })
-    mkdirSync(nested, { recursive: true })
-    expect(findRepoRoot(nested)).toBe(resolve(root))
+  it('asks git for the root, from the given directory', () => {
+    const run = responding({ stdout: '/repo\n' })
+    expect(findRepoRoot(run, '/repo/a/b')).toBe('/repo')
+    expect(run).toHaveBeenCalledWith('git', ['rev-parse', '--show-toplevel'], '/repo/a/b')
   })
 
-  it('accepts .git as a file, which is how worktrees and submodules store it', () => {
-    const root = join(temp, 'worktree')
-    mkdirSync(root, { recursive: true })
-    writeFileSync(join(root, '.git'), 'gitdir: ../real/.git')
-    expect(findRepoRoot(root)).toBe(resolve(root))
+  it('returns null outside a repository, where git exits non-zero', () => {
+    expect(findRepoRoot(responding({ status: 128 }), '/tmp')).toBeNull()
   })
 
-  it('returns null at the filesystem root when nothing is found', () => {
-    expect(findRepoRoot(parse(process.cwd()).root)).toBeNull()
+  it('returns null when git prints nothing', () => {
+    expect(findRepoRoot(responding({ stdout: '\n' }), '/tmp')).toBeNull()
   })
 })
 

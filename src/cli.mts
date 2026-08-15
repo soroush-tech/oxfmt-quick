@@ -35,28 +35,40 @@ if (args.help) {
   process.exit(0)
 }
 
-const result = oxfmtQuick(process.cwd(), {
-  ...args,
-  onFoundSinceRevision: (revision) => {
-    console.log(
-      revision
-        ? `🔍  Finding changed files since ${pc.bold(revision)}.`
-        : '🔍  No revision to compare against; looking at untracked files only.'
-    )
-  },
-  onFoundChangedFiles: (files) => {
-    console.log(`🎯  Found ${pc.bold(String(files.length))} changed ${plural(files.length)}.`)
-  },
-  onExamineFile: (file) => console.log(`🔍  Examining ${pc.bold(file)}.`),
-  onCheckFile: (file, isFormatted) => {
-    if (!isFormatted) console.log(`⛔️  Check failed: ${pc.bold(file)}`)
-  },
-  onWriteFile: (file) => console.log(`✍️   Fixing up ${pc.bold(file)}.`),
-  onPartiallyStagedFile: (file) => {
-    console.log(`✗  Found ${pc.bold('partially')} staged file ${file}.`)
-  },
-  onStageFiles: (files) => console.log(`🏗️   Staging ${files.length} ${plural(files.length)}.`),
-})
+/** A CLI should explain what went wrong, not print a stack trace at someone. */
+const run = <T,>(work: () => T): T => {
+  try {
+    return work()
+  } catch (error) {
+    console.error(`✗  ${error instanceof Error ? error.message : String(error)}`)
+    process.exit(1)
+  }
+}
+
+const result = run(() =>
+  oxfmtQuick(process.cwd(), {
+    ...args,
+    onFoundSinceRevision: (revision) => {
+      console.log(
+        revision
+          ? `🔍  Finding changed files since ${pc.bold(revision)}.`
+          : '🔍  No revision to compare against; looking at untracked files only.'
+      )
+    },
+    onFoundChangedFiles: (files) => {
+      console.log(`🎯  Found ${pc.bold(String(files.length))} changed ${plural(files.length)}.`)
+    },
+    onExamineFile: (file) => console.log(`🔍  Examining ${pc.bold(file)}.`),
+    onCheckFile: (file, isFormatted) => {
+      if (!isFormatted) console.log(`⛔️  Check failed: ${pc.bold(file)}`)
+    },
+    onWriteFile: (file) => console.log(`✍️   Fixing up ${pc.bold(file)}.`),
+    onPartiallyStagedFile: (file) => {
+      console.log(`✗  Found ${pc.bold('partially')} staged file ${file}.`)
+    },
+    onStageFiles: (files) => console.log(`🏗️   Staging ${files.length} ${plural(files.length)}.`),
+  })
+)
 
 function plural(count: number) {
   return count === 1 ? 'file' : 'files'

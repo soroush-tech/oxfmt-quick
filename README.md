@@ -173,13 +173,12 @@ passing an argv array exists to avoid.
 
 ## What it accesses
 
-Supply-chain scanners flag the Node built-ins a package imports. There are three, each
-used in one file for one purpose:
+Supply-chain scanners flag the Node built-ins a package imports. There are two, each used
+in one file for one purpose:
 
 | Built-in             | Where                 | What for                                      |
 | -------------------- | --------------------- | --------------------------------------------- |
 | `node:child_process` | `src/run.ts`          | running `git` and `oxfmt`                     |
-| `node:fs`            | `src/scm/git.ts`      | one `existsSync` to locate `.git`             |
 | `node:module`        | `src/resolveOxfmt.ts` | `createRequire`, to find oxfmt's `bin` script |
 
 Worth being precise about, since scanners often label the first one "shell access":
@@ -187,6 +186,9 @@ Worth being precise about, since scanners often label the first one "shell acces
 `shell: true`, so paths containing spaces, quotes or glob characters cannot be
 reinterpreted. There is no `eval`, no dynamic `require` of user input, no network access,
 and nothing is read from the environment.
+
+No filesystem API is used at all: every question about the repository — including where
+its root is — goes to git, which knows the answer better than a directory walk does.
 
 The package writes no files itself — oxfmt does that — and its only writes to your
 repository are the `git add` calls that re-stage what oxfmt formatted.
