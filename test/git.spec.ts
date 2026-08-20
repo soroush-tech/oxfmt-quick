@@ -52,21 +52,23 @@ describe('getSinceRevision', () => {
 })
 
 describe('stageFiles', () => {
-  it('batches at 100 paths per call, so long lists cannot exceed the command-line limit', () => {
+  it('batches by command-line length, so neither many paths nor long paths overrun it', () => {
     const calls: string[][] = []
     const run = vi.fn((_cmd: string, args: string[]) => {
       calls.push(args)
       return { stdout: '', stderr: '', status: 0 }
     }) as unknown as Run
 
-    const files = Array.from({ length: 250 }, (_, i) => `f${i}.ts`)
+    // 200 paths of ~250 characters: harmless by count, far past the limit by length.
+    const files = Array.from({ length: 200 }, (_, i) => `${'sub/'.repeat(60)}f${i}.ts`)
     expect(stageFiles(run, '/repo', files)).toBe(true)
 
-    expect(calls).toHaveLength(3)
-    expect(calls[0].slice(0, 2)).toEqual(['add', '--'])
-    expect(calls[0]).toHaveLength(102)
-    expect(calls[1]).toHaveLength(102)
-    expect(calls[2]).toHaveLength(52)
+    expect(calls.length).toBeGreaterThan(1)
+    for (const args of calls) {
+      expect(args.slice(0, 2)).toEqual(['add', '--'])
+      expect(args.join(' ').length).toBeLessThanOrEqual(30_000)
+    }
+    expect(calls.flatMap((args) => args.slice(2))).toEqual(files)
   })
 
   it('stops and reports false when a batch fails', () => {

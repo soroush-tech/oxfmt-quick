@@ -1,3 +1,4 @@
+import { batchFiles } from '../batch'
 import type { Run } from '../types'
 
 /**
@@ -53,12 +54,14 @@ export const getFilesSince = (run: Run, root: string, revision: string): string[
  * Stage in batches, and report whether every batch landed.
  *
  * A single `git add` with thousands of paths blows past the command-line length limit,
- * which is far lower on Windows (~32k) than on Unix.
+ * which is far lower on Windows (~32k) than on Unix. Batched by length, not count: a
+ * hundred deeply nested CI paths overrun the limit just as surely as a thousand short
+ * ones.
  */
 export const stageFiles = (run: Run, root: string, files: string[]): boolean => {
-  const BATCH = 100
-  for (let index = 0; index < files.length; index += BATCH) {
-    const { status } = run('git', ['add', '--', ...files.slice(index, index + BATCH)], root)
+  const RESERVED = 'git add --'.length
+  for (const batch of batchFiles(files, RESERVED)) {
+    const { status } = run('git', ['add', '--', ...batch], root)
     if (status !== 0) return false
   }
   return true
