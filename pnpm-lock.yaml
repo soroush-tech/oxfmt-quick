@@ -21,6 +21,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^4.1.10
         version: 4.1.10(vitest@4.1.10)
+      ai-watermark-guard:
+        specifier: ^0.2.0
+        version: 0.2.0
       oxfmt:
         specifier: ^0.63.0
         version: 0.63.0
@@ -391,6 +394,41 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
+  '@soroush.tech/ai-watermark-guard-darwin-arm64@0.2.0':
+    resolution: {integrity: sha512-ssf8ybqz8QW0Wco2kneZLB+mHj+2VqQgmzO5KhgdRIPRaTpx8GEvFX/IaK6BJs5Sjw0+6YtZ7bzhOQuxiIJ32A==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@soroush.tech/ai-watermark-guard-darwin-x64@0.2.0':
+    resolution: {integrity: sha512-0S4JlWK0YU2DJq4zyzTEQ2BJhzeER5yGk3EdSF0WrbAW0+uVg/ND66j7fzjWa684T7f8qpvmcOsinRQSVESeog==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@soroush.tech/ai-watermark-guard-linux-arm64@0.2.0':
+    resolution: {integrity: sha512-ihwNllaq7joyCncYOEzMNQCcxTWCnL9BYcLcllqKXXVFH04So+YWzOZZSiPIpti5i58A3Zpfs1RK2f3mYvWT0A==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@soroush.tech/ai-watermark-guard-linux-x64-musl@0.2.0':
+    resolution: {integrity: sha512-/jSqez4vb4gwej7BGZKnagxqUQrFCi1kDejAmFv3oVHKhDibdL6l6QGAqRhkN49e9UXmbQb6/Ve9SgB5FuiVwQ==}
+    cpu: [x64]
+    os: [linux]
+
+  '@soroush.tech/ai-watermark-guard-linux-x64@0.2.0':
+    resolution: {integrity: sha512-uoqhjTuWmsmh6SnU0V0lHwP4DjONKzBmgP5ZJRQqb5HvKQ6PDr9iLJK6usBGXW/EwFDRvTGzmVfWUVcBfubKyg==}
+    cpu: [x64]
+    os: [linux]
+
+  '@soroush.tech/ai-watermark-guard-win32-arm64@0.2.0':
+    resolution: {integrity: sha512-FvZmNVLxk5eW98g72Iyq+O2o8c+mh4xfd7wKr+SKoIOYruWMCIsNTllOo9j9uqQbNGLhkhoeVY7EPRbIS1XMpw==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@soroush.tech/ai-watermark-guard-win32-x64@0.2.0':
+    resolution: {integrity: sha512-b/DoiT4LhiyxKpd8ssNU7SbHUyTujTnIwo5C/PvyF+mFT2yV697vhU1xrMebG5oPkRZzwApvXxiFnxhmR66vIg==}
+    cpu: [x64]
+    os: [win32]
+
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
@@ -686,6 +724,11 @@ packages:
 
   '@yuku-toolchain/types@0.8.7':
     resolution: {integrity: sha512-2Z53dNxAJL6UvFoIrDZvYf3zlO8s4VJK4O2hhaB4mXVwwpX/7ajtss3cmfqKvamlNLWyt9FSWs4eoYdlbxpnHA==}
+
+  ai-watermark-guard@0.2.0:
+    resolution: {integrity: sha512-58GMcJq7Y67Q8c46cO8hu0psoC6UWezWjUJkruFtbFyELna1OEW4sbD6AY1KGVSycBqWPEZxL5gxP1Odc4mayw==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   ansis@4.3.1:
     resolution: {integrity: sha512-BJ8/l4R5LRE7hW9WdSuGYrLSHi2ynxeFpDFbH0K/CgNeY/tyhk+vO6TYxXC5r5CpUhNVX310xzPsN/H9lCdfOA==}
@@ -1331,6 +1374,27 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
+  '@soroush.tech/ai-watermark-guard-darwin-arm64@0.2.0':
+    optional: true
+
+  '@soroush.tech/ai-watermark-guard-darwin-x64@0.2.0':
+    optional: true
+
+  '@soroush.tech/ai-watermark-guard-linux-arm64@0.2.0':
+    optional: true
+
+  '@soroush.tech/ai-watermark-guard-linux-x64-musl@0.2.0':
+    optional: true
+
+  '@soroush.tech/ai-watermark-guard-linux-x64@0.2.0':
+    optional: true
+
+  '@soroush.tech/ai-watermark-guard-win32-arm64@0.2.0':
+    optional: true
+
+  '@soroush.tech/ai-watermark-guard-win32-x64@0.2.0':
+    optional: true
+
   '@standard-schema/spec@1.1.0': {}
 
   '@types/chai@5.2.3':
@@ -1534,6 +1598,16 @@ snapshots:
     optional: true
 
   '@yuku-toolchain/types@0.8.7': {}
+
+  ai-watermark-guard@0.2.0:
+    optionalDependencies:
+      '@soroush.tech/ai-watermark-guard-darwin-arm64': 0.2.0
+      '@soroush.tech/ai-watermark-guard-darwin-x64': 0.2.0
+      '@soroush.tech/ai-watermark-guard-linux-arm64': 0.2.0
+      '@soroush.tech/ai-watermark-guard-linux-x64': 0.2.0
+      '@soroush.tech/ai-watermark-guard-linux-x64-musl': 0.2.0
+      '@soroush.tech/ai-watermark-guard-win32-arm64': 0.2.0
+      '@soroush.tech/ai-watermark-guard-win32-x64': 0.2.0
 
   ansis@4.3.1: {}
 

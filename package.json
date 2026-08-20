@@ -62,6 +62,7 @@
     "build": "tsdown",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
+    "guard": "ai-watermark-guard --all",
     "lint": "oxlint --deny-warnings",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -75,6 +76,7 @@
   "devDependencies": {
     "@types/node": "^26.2.0",
     "@vitest/coverage-v8": "^4.1.10",
+    "ai-watermark-guard": "^0.2.0",
     "oxfmt": "^0.63.0",
     "oxlint": "^1.78.0",
     "tsdown": "^0.22.14",
