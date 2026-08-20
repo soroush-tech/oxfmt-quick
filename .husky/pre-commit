@@ -1,0 +1,1 @@
+pnpm exec ai-watermark-guard --staged --fix

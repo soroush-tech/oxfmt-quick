@@ -61,3 +61,37 @@ describe('format', () => {
     expect(format(run('', 1), ['oxfmt'], '/repo', ['a.ts'])).toBe(false)
   })
 })
+
+describe('batching', () => {
+  // Paths long enough that a few thousand cannot fit one command line.
+  const files = Array.from({ length: 3000 }, (_, i) => `src/${'deep/'.repeat(10)}file-${i}.ts`)
+
+  it('splits a long list across several invocations and merges what they report', () => {
+    const calls: string[][] = []
+    const spy = vi.fn((_cmd: string, args: string[]) => {
+      calls.push(args)
+      return { stdout: `${args[1]}\n`, stderr: '', status: 1 }
+    }) as unknown as Run
+
+    const different = listDifferent(spy, ['oxfmt'], '/repo', files)
+
+    expect(calls.length).toBeGreaterThan(1)
+    expect(calls.flatMap((args) => args.slice(1))).toEqual(files)
+    for (const args of calls) {
+      expect(args[0]).toBe('--list-different')
+      expect(args.join(' ').length).toBeLessThanOrEqual(30_000)
+    }
+    // One reported path per invocation, all surviving the merge.
+    expect(different).toEqual(calls.map((args) => args[1]))
+  })
+
+  it('formats every batch, and fails when any batch fails', () => {
+    const ok = vi.fn(() => ({ stdout: '', stderr: '', status: 0 }))
+    expect(format(ok as unknown as Run, ['oxfmt'], '/repo', files)).toBe(true)
+    expect(ok.mock.calls.length).toBeGreaterThan(1)
+
+    let call = 0
+    const failsSecond = vi.fn(() => ({ stdout: '', stderr: '', status: call++ === 1 ? 1 : 0 }))
+    expect(format(failsSecond as unknown as Run, ['oxfmt'], '/repo', files)).toBe(false)
+  })
+})

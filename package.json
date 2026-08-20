@@ -1,6 +1,6 @@
 {
   "name": "oxfmt-quick",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Run oxfmt on your changed files, and re-stage them. A pretty-quick for the oxc formatter.",
   "keywords": [
     "formatter",
@@ -67,7 +67,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm build",
+    "prepare": "husky"
   },
   "dependencies": {
     "mri": "^1.2.0",
@@ -77,6 +78,7 @@
     "@types/node": "^26.2.0",
     "@vitest/coverage-v8": "^4.1.10",
     "ai-watermark-guard": "^0.2.0",
+    "husky": "^9.1.7",
     "oxfmt": "^0.63.0",
     "oxlint": "^1.78.0",
     "tsdown": "^0.22.14",

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import mri from 'mri'
 import pc from 'picocolors'
+import { writeErrorReport } from './errorReport.js'
 import { oxfmtQuick } from './index.js'
 
 const args = mri(process.argv.slice(2), {
@@ -35,12 +36,30 @@ if (args.help) {
   process.exit(0)
 }
 
-/** A CLI should explain what went wrong, not print a stack trace at someone. */
+/**
+ * Interactively, a CLI should explain what went wrong, not print a stack trace at
+ * someone. In CI there is no someone: the log is the whole debugging session, and the
+ * stack is the difference between a report that can be acted on and a bare ENAMETOOLONG.
+ * `--verbose` asks for the same detail locally. Either way the full report goes to a
+ * file, so "please attach the log" is a thing a bug template can ask for.
+ */
+const wantStack = args.verbose || Boolean(process.env.CI && process.env.CI !== 'false')
+
 const run = <T,>(work: () => T): T => {
   try {
     return work()
   } catch (error) {
-    console.error(`✗  ${error instanceof Error ? error.message : String(error)}`)
+    if (wantStack && error instanceof Error) {
+      console.error(`✗  ${error.stack ?? error.message}`)
+    } else {
+      console.error(`✗  ${error instanceof Error ? error.message : String(error)}`)
+      console.error(pc.dim('   Rerun with --verbose for the full error.'))
+    }
+    // This file and package.json are siblings of one directory, in src and dist alike.
+    const report = writeErrorReport(error, new URL('../package.json', import.meta.url))
+    if (report) {
+      console.error(pc.dim(`   Report written to ${report} - attach it when filing an issue.`))
+    }
     process.exit(1)
   }
 }
