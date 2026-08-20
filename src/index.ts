@@ -10,14 +10,14 @@ export type { FailureReason, OxfmtQuickOptions, OxfmtQuickResult, Run } from './
  * Format your changed files.
  *
  * By default that means everything changed since the merge-base with `branch`, plus
- * untracked files — the same default `pretty-quick` has, so the two behave alike.
+ * untracked files - the same default `pretty-quick` has, so the two behave alike.
  *
  * With `staged`, only the index is consulted and the formatted files are re-staged: that
  * is the pre-commit mode, where anything unstaged is not going into the commit and
  * formatting it would be work the commit never uses.
  *
  * In that mode a file that is staged *and* edited further is formatted but deliberately
- * **not** re-staged — `git add`ing it would sweep those unstaged edits into the commit
+ * **not** re-staged - `git add`ing it would sweep those unstaged edits into the commit
  * and silently widen it. The run reports `PARTIALLY_STAGED_FILE` so the hook fails and
  * you decide what to stage.
  */
@@ -63,7 +63,7 @@ export const oxfmtQuick = (
       : git.getUntrackedFiles(run, root)
   }
 
-  // A path can arrive twice — renamed and untracked lists can overlap.
+  // A path can arrive twice - renamed and untracked lists can overlap.
   changed = [...new Set(changed)]
   onFoundChangedFiles?.(changed)
   if (verbose) changed.forEach((file) => onExamineFile?.(file))

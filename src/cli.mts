@@ -10,7 +10,7 @@ const args = mri(process.argv.slice(2), {
 })
 
 const HELP = `
-  ${pc.bold('oxfmt-quick')} — run oxfmt on your changed files
+  ${pc.bold('oxfmt-quick')} - run oxfmt on your changed files
 
   ${pc.bold('Usage')}
     oxfmt-quick [options]

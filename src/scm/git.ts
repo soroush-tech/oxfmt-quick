@@ -5,7 +5,7 @@ import type { Run } from '../types'
  *
  * Asked of git rather than found by walking up looking for `.git`. Git already knows the
  * answer and knows it better: it honours `GIT_DIR` and `GIT_WORK_TREE`, resolves worktrees
- * and submodules — where `.git` is a file, not a directory — and returns a canonical path.
+ * and submodules - where `.git` is a file, not a directory - and returns a canonical path.
  * A hand-rolled walk only approximates all of that.
  *
  * It also means this module touches no filesystem API at all; every question about the
@@ -19,7 +19,7 @@ export const findRepoRoot = (run: Run, from: string): string | null => {
 /**
  * `-z` and a NUL split, not newline: with the default `core.quotepath`, git wraps paths
  * containing non-ASCII or unusual characters in quotes and escapes them when printing
- * newline-separated. Splitting on `\n` corrupts those paths — and a filename may legally
+ * newline-separated. Splitting on `\n` corrupts those paths - and a filename may legally
  * contain a newline. `-z` sidesteps both.
  */
 const paths = (run: Run, root: string, args: string[]): string[] => {

@@ -9,7 +9,7 @@ export type FailureReason =
 export interface OxfmtQuickOptions {
   /**
    * Pre-commit mode: consider only files staged for commit, and re-stage them after
-   * formatting. Default `false` — the same default `pretty-quick` has, where a bare run
+   * formatting. Default `false` - the same default `pretty-quick` has, where a bare run
    * covers everything changed since the merge-base.
    */
   staged: boolean
@@ -45,7 +45,7 @@ export interface OxfmtQuickResult {
 export interface CommandResult {
   stdout: string
   stderr: string
-  /** Exit code. Non-zero is not an error here — `oxfmt --list-different` uses 1 to mean "found some". */
+  /** Exit code. Non-zero is not an error here - `oxfmt --list-different` uses 1 to mean "found some". */
   status: number
 }
 

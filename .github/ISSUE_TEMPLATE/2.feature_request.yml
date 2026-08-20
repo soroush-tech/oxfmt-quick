@@ -8,7 +8,7 @@ body:
         Please give the request a searchable title above ⬆️
 
         Worth knowing before you write: `oxfmt-quick` deliberately does not resolve
-        config or ignore rules — oxfmt already does that, and a second implementation
+        config or ignore rules - oxfmt already does that, and a second implementation
         would drift. Requests along those lines usually belong upstream in
         [oxc](https://github.com/oxc-project/oxc).
 
@@ -24,7 +24,7 @@ body:
     attributes:
       label: The problem
       description: What are you trying to do that is awkward or impossible today?
-      placeholder: When I …, I have to … because …
+      placeholder: When I ..., I have to ... because ...
     validations:
       required: true
 

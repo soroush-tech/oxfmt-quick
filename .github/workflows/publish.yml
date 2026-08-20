@@ -1,11 +1,11 @@
 name: Publish
 
 # Publishes to npm via Trusted Publishing (OIDC), then cuts the GitHub Release. Manual
-# dispatch only — never from a push, a merge, or CI finishing. A release is a deliberate
+# dispatch only - never from a push, a merge, or CI finishing. A release is a deliberate
 # act with required, human-written notes; auth is a short-lived id-token minted per run
 # and verified against the npm trusted publisher, so there is no long-lived token.
 #
-# Deliberately not triggered by `release: published` — this workflow *creates* the
+# Deliberately not triggered by `release: published` - this workflow *creates* the
 # release, so that trigger would be circular.
 
 on:
@@ -36,7 +36,7 @@ jobs:
           persist-credentials: false
 
       # The version is the release, so refuse one that is undocumented before doing any
-      # work — and read it once here for every later step.
+      # work - and read it once here for every later step.
       - name: Resolve the version and check its notes
         run: |
           NAME=$(node -p "require('./package.json').name")
@@ -62,13 +62,13 @@ jobs:
 
       # The Node line matters for more than the build: trusted publishing is implemented
       # in the npm CLI, and only npm 11+ can perform the OIDC exchange. Node 22 still
-      # bundles npm 10, which publishes anonymously — reported by the registry as a 404 on
+      # bundles npm 10, which publishes anonymously - reported by the registry as a 404 on
       # the package rather than as an auth error. .nvmrc pins a line new enough to avoid it.
       #
       # No registry-url, deliberately. It makes setup-node write an .npmrc carrying
       # `always-auth` and `_authToken=${NODE_AUTH_TOKEN}`; with no such token to expand,
       # npm reads that literal placeholder as a credential, considers auth settled, and
-      # never attempts the OIDC exchange — publishing anonymously and 404ing on a package
+      # never attempts the OIDC exchange - publishing anonymously and 404ing on a package
       # it does not own. The default registry is npmjs.org anyway, so nothing is lost.
       - name: Setup Node
         uses: actions/setup-node@v5
@@ -77,7 +77,7 @@ jobs:
           cache: pnpm
 
       # Both ways this can silently fall back to an anonymous publish are checked here,
-      # because the registry reports that as a 404 on the package — a misleading error, and
+      # because the registry reports that as a 404 on the package - a misleading error, and
       # one that only arrives after the whole run has been spent. Fail in seconds instead.
       - name: Preflight the OIDC publish
         run: |
@@ -92,11 +92,11 @@ jobs:
           NPMRC="${NPM_CONFIG_USERCONFIG:-$HOME/.npmrc}"
           if [ -f "$NPMRC" ] && grep -q '_authToken' "$NPMRC"; then
             echo "::error::$NPMRC configures an auth token, so the OIDC exchange would be skipped."
-            echo "::error::Usually setup-node's registry-url input — remove it."
+            echo "::error::Usually setup-node's registry-url input - remove it."
             exit 1
           fi
 
-          echo "npm $VERSION, no auth token in ${NPMRC} — OIDC it is."
+          echo "npm $VERSION, no auth token in ${NPMRC} - OIDC it is."
 
       # --ignore-scripts, as everywhere in CI/CD: no lifecycle script runs at install.
       - name: Install dependencies
@@ -114,7 +114,7 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # Publish via Trusted Publishing (OIDC). Auth comes from the id-token minted above —
+      # Publish via Trusted Publishing (OIDC). Auth comes from the id-token minted above -
       # there is no NPM_TOKEN, and NODE_AUTH_TOKEN must stay unset, because even an empty
       # value makes pnpm use token auth instead of falling back to OIDC. A version already
       # on the registry is skipped rather than failed, so a rerun can carry on to the
@@ -122,7 +122,7 @@ jobs:
       - name: Publish
         run: |
           if npm view "$PKG_NAME@$PKG_VERSION" version >/dev/null 2>&1; then
-            echo "⏭️ \`$PKG_NAME@$PKG_VERSION\` already on npm — skipped (bump the version to release)." >> "$GITHUB_STEP_SUMMARY"
+            echo "⏭️ \`$PKG_NAME@$PKG_VERSION\` already on npm - skipped (bump the version to release)." >> "$GITHUB_STEP_SUMMARY"
             echo "ON_NPM=true" >> "$GITHUB_ENV"
             exit 0
           fi
@@ -133,13 +133,13 @@ jobs:
           echo "::notice title=Published::$PKG_NAME@$PKG_VERSION"
 
       # Gated on ON_NPM, set by the step above when it either published the version or found
-      # it already there — so a rerun still repairs a missing release, without asking the
+      # it already there - so a rerun still repairs a missing release, without asking the
       # registry a question this job already knows the answer to. It must not ask: packuments
       # are served `max-age=300`, and the step above has just cached a pre-publish copy while
       # deciding whether to skip, so a fresh `npm view` here reads a five-minute-stale
       # document, concludes the version was never published, and silently skips the release.
       #
-      # Runs even if the step above failed (`!cancelled()`), which leaves ON_NPM unset — a
+      # Runs even if the step above failed (`!cancelled()`), which leaves ON_NPM unset - a
       # version that never reached npm is skipped rather than released. Notes come from the
       # in-repo file verbatim via --notes-file.
       - name: Create the GitHub Release
@@ -149,11 +149,11 @@ jobs:
         run: |
           TAG="v$PKG_VERSION"
           if [ "$ON_NPM" != true ]; then
-            echo "⏭️ \`$TAG\` is not on npm — no GitHub Release created." >> "$GITHUB_STEP_SUMMARY"
+            echo "⏭️ \`$TAG\` is not on npm - no GitHub Release created." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "⏭️ GitHub Release \`$TAG\` already exists — skipped." >> "$GITHUB_STEP_SUMMARY"
+            echo "⏭️ GitHub Release \`$TAG\` already exists - skipped." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           gh release create "$TAG" --title "$PKG_NAME@$PKG_VERSION" --notes-file "$NOTES_FILE"

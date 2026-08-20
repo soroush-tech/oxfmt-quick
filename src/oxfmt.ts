@@ -1,6 +1,6 @@
 import type { CommandResult, Run } from './types'
 
-/** `command` is the argv prefix from `resolveOxfmt` — usually `[node, .../oxfmt/bin/oxfmt]`. */
+/** `command` is the argv prefix from `resolveOxfmt` - usually `[node, .../oxfmt/bin/oxfmt]`. */
 const invoke = (
   run: Run,
   command: string[],
@@ -17,11 +17,11 @@ const invoke = (
  * Which of `files` oxfmt would rewrite.
  *
  * `--list-different` exits **1** when it finds anything, which is a report rather than a
- * failure — so the status is deliberately ignored and stdout is read either way.
+ * failure - so the status is deliberately ignored and stdout is read either way.
  *
  * Batching here is why the tool stays fast. `pretty-quick` reads, formats and compares
  * each file itself in Node; oxfmt answers for the whole set in one Rust process, applying
- * its own config resolution and ignore rules as it goes — so there is no `.oxfmtrc` lookup
+ * its own config resolution and ignore rules as it goes - so there is no `.oxfmtrc` lookup
  * or `.gitignore` matching to reimplement.
  *
  * Files oxfmt does not handle (images, lockfiles) it skips itself, so callers can pass a

@@ -13,14 +13,14 @@ describe('resolveOxfmt', () => {
   })
 
   it('falls back to a bare PATH lookup where oxfmt is not installed', () => {
-    // A directory with no reachable node_modules — resolution must fail, not throw.
+    // A directory with no reachable node_modules - resolution must fail, not throw.
     expect(resolveOxfmt('/')).toEqual(['oxfmt'])
   })
 })
 
 describe('resolveOxfmt with a string bin field', () => {
   // realpath, because on macOS os.tmpdir() is `/var/...` while Node's resolver returns the
-  // canonical `/private/var/...` — comparing the two forms fails there and nowhere else.
+  // canonical `/private/var/...` - comparing the two forms fails there and nowhere else.
   const temp = realpathSync(mkdtempSync(join(tmpdir(), 'oxfmt-quick-resolve-')))
   afterAll(() => rmSync(temp, { recursive: true, force: true }))
 

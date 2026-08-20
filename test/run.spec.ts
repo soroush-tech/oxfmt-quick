@@ -8,7 +8,7 @@ describe('run', () => {
     expect(result).toMatchObject({ stdout: 'ok', status: 0 })
   })
 
-  it('returns a non-zero status rather than throwing — oxfmt uses exit 1 to report findings', () => {
+  it('returns a non-zero status rather than throwing - oxfmt uses exit 1 to report findings', () => {
     const result = run(
       process.execPath,
       ['-e', 'process.stdout.write("found"); process.exit(1)'],

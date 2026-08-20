@@ -26,7 +26,7 @@ const fakeRun = (responses: {
     if (command !== 'git') {
       if (args.includes('--list-different')) {
         const found = responses.listDifferent ?? []
-        // oxfmt exits 1 when it finds anything — that is a report, not a failure.
+        // oxfmt exits 1 when it finds anything - that is a report, not a failure.
         return { stdout: found.join('\n'), stderr: '', status: found.length > 0 ? 1 : 0 }
       }
       return responses.formatFails ? fail() : ok()

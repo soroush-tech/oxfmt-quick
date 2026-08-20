@@ -21,7 +21,7 @@ you off is worse. `oxfmt-quick` formats what you actually touched and gets out o
 
 By default it takes everything changed since the merge-base with your branch, plus
 untracked files. Add `--staged` and it takes the index instead, re-staging what it
-formats — that is the pre-commit mode, and the same split `pretty-quick` uses.
+formats - that is the pre-commit mode, and the same split `pretty-quick` uses.
 
 Supported source control managers:
 
@@ -89,7 +89,7 @@ non-zero code. See [Partially staged files](#partially-staged-files).
 
 ### `--since <rev>`
 
-Compare against a specific revision — a commit hash, tag or ref — instead of the
+Compare against a specific revision - a commit hash, tag or ref - instead of the
 merge-base. For example `oxfmt-quick --since HEAD~5`.
 
 ### `--branch <name>`
@@ -125,7 +125,7 @@ errors and you cannot tell which file caused it.
 ## Partially staged files
 
 If a file is staged and then edited again, only the staged content is going into the
-commit. `oxfmt-quick` formats the file on disk but deliberately does **not** re-stage it —
+commit. `oxfmt-quick` formats the file on disk but deliberately does **not** re-stage it -
 `git add` would sweep the unstaged edits in and silently widen your commit. The file is
 reported and the run exits non-zero, so you can amend your staging to include the
 formatting fix.
@@ -137,7 +137,7 @@ comparable tool ([biomejs/biome#3608](https://github.com/biomejs/biome/issues/36
 
 `oxfmt-quick` resolves nothing itself. oxfmt already reads
 [`.oxfmtrc`](https://oxc.rs/docs/guide/usage/formatter), `.gitignore`, `.prettierignore`
-and `.editorconfig`, searching up the file system as it goes — so there is no second
+and `.editorconfig`, searching up the file system as it goes - so there is no second
 implementation here to drift out of step with it.
 
 For the same reason there is no extension filter: oxfmt skips files it cannot format, so
@@ -157,7 +157,7 @@ const { success, errors } = oxfmtQuick(process.cwd(), {
 ```
 
 `errors` contains any of `BAIL_ON_WRITE`, `CHECK_FAILED`, `FORMAT_FAILED`,
-`PARTIALLY_STAGED_FILE` or `STAGE_FAILED`. Every callback is optional — the CLI is a thin
+`PARTIALLY_STAGED_FILE` or `STAGE_FAILED`. Every callback is optional - the CLI is a thin
 reporting layer over this one function.
 
 ## Notes
@@ -167,7 +167,7 @@ spaces, non-ASCII characters or newlines survive intact. `git add` is issued in 
 100, so a large changeset cannot exceed the command-line length limit.
 
 oxfmt is invoked by resolving its own `bin` script and running it with the current `node`,
-rather than looking `oxfmt` up on `PATH` — on Windows that entry is a `.CMD` shim which
+rather than looking `oxfmt` up on `PATH` - on Windows that entry is a `.CMD` shim which
 cannot be spawned without a shell, and a shell would reintroduce the quoting problems that
 passing an argv array exists to avoid.
 
@@ -187,18 +187,18 @@ Worth being precise about, since scanners often label the first one "shell acces
 reinterpreted. There is no `eval`, no dynamic `require` of user input, no network access,
 and nothing is read from the environment.
 
-No filesystem API is used at all: every question about the repository — including where
-its root is — goes to git, which knows the answer better than a directory walk does.
+No filesystem API is used at all: every question about the repository - including where
+its root is - goes to git, which knows the answer better than a directory walk does.
 
-The package writes no files itself — oxfmt does that — and its only writes to your
+The package writes no files itself - oxfmt does that - and its only writes to your
 repository are the `git add` calls that re-stage what oxfmt formatted.
 
 ## Changelog
 
 Every released version has its own notes in
-[`release-notes/`](https://github.com/soroush-tech/oxfmt-quick/tree/main/release-notes) —
+[`release-notes/`](https://github.com/soroush-tech/oxfmt-quick/tree/main/release-notes) -
 one file per version, and the publish workflow refuses to ship a version without them.
 
 ## Licence
 
-[MIT](./LICENSE) — Powered by [Soroush.tech](https://soroush.tech)
+[MIT](./LICENSE) - Powered by [Soroush.tech](https://soroush.tech)

@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path'
  *
  * Resolving oxfmt's own `bin` script and running it with the current `node` beats calling
  * `oxfmt` off the PATH: on Windows the PATH entry is a `.CMD` shim, which `execFileSync`
- * cannot execute without a shell — and reaching for a shell would reintroduce the quoting
+ * cannot execute without a shell - and reaching for a shell would reintroduce the quoting
  * problems that passing an argv array exists to avoid.
  *
  * Resolution starts from the directory being formatted, not from this package, because
@@ -20,7 +20,7 @@ export const resolveOxfmt = (from: string): string[] => {
     const entry = typeof bin === 'string' ? bin : bin?.oxfmt
     if (entry) return [process.execPath, join(dirname(manifestPath), entry)]
   } catch {
-    // Not resolvable from the target project — fall through to the PATH lookup.
+    // Not resolvable from the target project - fall through to the PATH lookup.
   }
   return ['oxfmt']
 }
